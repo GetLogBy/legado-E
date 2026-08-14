@@ -12,6 +12,7 @@ import io.legado.app.lib.webdav.Authorization
 import io.legado.app.lib.webdav.WebDav
 import io.legado.app.lib.webdav.WebDavFile
 import io.legado.app.utils.GSON
+import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.sha1Encode
 
 /**
@@ -208,7 +209,7 @@ object SyncClient {
 
     // ============================ 冲突处理 ============================
 
-    private fun pullUpdate(
+    private suspend fun pullUpdate(
         file: WebDavFile,
         local: Any?,
         lastPullAt: Long,
@@ -331,11 +332,11 @@ object SyncClient {
 
     // ============================ 工具 ============================
 
-    private fun listRemoteFiles(url: String): List<WebDavFile> {
+    private suspend fun listRemoteFiles(url: String): List<WebDavFile> {
         return webDav(url).listFiles()
     }
 
-    private fun listRemoteFiles(type: DataSyncType): List<WebDavFile> {
+    private suspend fun listRemoteFiles(type: DataSyncType): List<WebDavFile> {
         return listRemoteFiles(dirUrl(type))
     }
 

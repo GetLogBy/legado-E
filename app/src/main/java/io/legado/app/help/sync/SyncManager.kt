@@ -2,7 +2,6 @@ package io.legado.app.help.sync
 
 import io.legado.app.help.AppWebDav
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.help.coroutine.onError
 import io.legado.app.utils.printOnDebug
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.sync.Mutex
@@ -27,7 +26,7 @@ object SyncManager {
             syncAll()
         }.onError {
             it.printOnDebug()
-            it.toastOnUi()
+            appCtx.toastOnUi(it.localizedMessage)
             SyncLedger.lastResult = "同步失败: ${it.localizedMessage}"
         }.invokeOnCompletion {
             onFinish?.invoke()

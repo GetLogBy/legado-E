@@ -41,3 +41,5 @@ object MD5Utils {
         return SHA1Digester.digestHex(str)
     }
 }
+
+fun String.sha1Encode(): String = MD5Utils.sha1Encode(this)

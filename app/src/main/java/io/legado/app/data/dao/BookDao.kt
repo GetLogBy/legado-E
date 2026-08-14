@@ -84,8 +84,8 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE (`group` & :group) > 0")
     fun getBooksByGroup(group: Long): List<Book>
 
-    @Query("SELECT * FROM books where local_modified > cloud_modified")
-    fun getNeedPush(): List<Book>
+    @get:Query("SELECT * FROM books where local_modified > cloud_modified")
+    val needPush: List<Book>
 
     @Query("update books set cloud_modified = :cloudModified, local_modified = :cloudModified where bookUrl = :bookUrl and local_modified <= :cloudModified")
     fun markSynced(bookUrl: String, cloudModified: Long)
