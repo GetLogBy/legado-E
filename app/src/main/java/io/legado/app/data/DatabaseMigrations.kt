@@ -20,7 +20,148 @@ object DatabaseMigrations {
             migration_31_32, migration_32_33, migration_33_34, migration_34_35,
             migration_35_36, migration_36_37, migration_37_38, migration_38_39,
             migration_39_40, migration_40_41, migration_41_42, migration_42_43,
+            migration_89_90,
         )
+    }
+
+    init {
+        //初始化注册 43~89 的自动迁移由 AppDatabase 的 autoMigrations 处理
+    }
+
+    /**
+     * 增量同步: 为四张核心表增加本地/云端修改时间, 并创建墓碑表与冲突表
+     *
+     * 触发器说明:
+     * - AFTER DELETE 触发器写入墓碑, 使"删除"也具有可同步语义
+     * - 同步引擎应用云端数据时会显式写入 local_modified/cloud_modified,
+     *   此时 NEW.local_modified != OLD.local_modified, 触发器不会重复打点
+     * - 复杂的时间戳打点由 SyncClient 在写入前显式赋值, 不在 SQL 中取 now
+     */
+    @Suppress("ObjectPropertyName")
+    private val migration_89_90 = object : Migration(89, 90) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            //同步时间字段
+            db.execSQL("ALTER TABLE books ADD COLUMN local_modified INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE books ADD COLUMN cloud_modified INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE bookmarks ADD COLUMN local_modified INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE bookmarks ADD COLUMN cloud_modified INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE book_groups ADD COLUMN local_modified INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE book_groups ADD COLUMN cloud_modified INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE readRecord ADD COLUMN local_modified INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE readRecord ADD COLUMN cloud_modified INTEGER NOT NULL DEFAULT 0")
+            //墓碑表
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `sync_tombstones` (
+                    `tableName` TEXT NOT NULL, `recordKey` TEXT NOT NULL,
+                    `deletedAt` INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(`tableName`, `recordKey`)
+                )
+                """.trimIndent()
+            )
+            //冲突表
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `sync_conflicts` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `tableName` TEXT NOT NULL,
+                    `recordKey` TEXT NOT NULL,
+                    `localModified` INTEGER NOT NULL DEFAULT 0,
+                    `cloudModified` INTEGER NOT NULL DEFAULT 0,
+                    `localJson` TEXT,
+                    `cloudJson` TEXT,
+                    `status` INTEGER NOT NULL DEFAULT 0,
+                    `createdAt` INTEGER NOT NULL DEFAULT 0
+                )
+                """.trimIndent()
+            )
+            createTombstoneTriggers(db)
+            createModifiedTriggers(db)
+        }
+    }
+
+    /**
+     * 本地修改时间触发器:
+     * - INSERT: local_modified 保持 0(=用户写入,未显式盖章)时打点当前毫秒
+     * - UPDATE: local_modified 未被 SyncClient 显式改写时打点
+     * 同步引擎应用云端数据时显式写入 local_modified=cloud_modified, 触发器跳过, 不会回环。
+     * 毫秒时间由 julianday 换算出 Unix 毫秒。
+     */
+    internal fun createModifiedTriggers(db: SupportSQLiteDatabase) {
+        val nowMs = "(CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER))"
+        val defs = listOf(
+            "books" to "bookUrl = NEW.bookUrl",
+            "bookmarks" to "time = NEW.time",
+            "book_groups" to "groupId = NEW.groupId",
+            "readRecord" to "deviceId = NEW.deviceId AND bookName = NEW.bookName"
+        )
+        defs.forEach { (table, whereClause) ->
+            val tableName = "`$table`"
+            db.execSQL(
+                """
+                CREATE TRIGGER IF NOT EXISTS `trg_${table}_ins_modified`
+                AFTER INSERT ON $tableName
+                WHEN NEW.local_modified <= 0
+                BEGIN
+                    UPDATE $tableName SET local_modified = $nowMs WHERE $whereClause;
+                END
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                CREATE TRIGGER IF NOT EXISTS `trg_${table}_up_modified`
+                AFTER UPDATE ON $tableName
+                WHEN NEW.cloud_modified = OLD.cloud_modified AND NEW.local_modified <= OLD.local_modified
+                BEGIN
+                    UPDATE $tableName SET local_modified = $nowMs WHERE $whereClause;
+                END
+                """.trimIndent()
+            )
+        }
+    }
+
+    /**
+     * 删除/插入触发器: 记录删除墓碑
+     * NOTE: Room 的 INSERT OR REPLACE 会先触发 DELETE 再触发 INSERT,
+     * 因此 INSERT 触发器负责清理同键墓碑, 保证 REPLACE 不会产生幽灵墓碑。
+     */
+    internal fun createTombstoneTriggers(db: SupportSQLiteDatabase) {
+        val nowMs = "(CAST(strftime('%s','now') AS INTEGER) * 1000)"
+        val defs = listOf(
+            Triple("books", "OLD.bookUrl", "NEW.bookUrl"),
+            Triple("bookmarks", "CAST(OLD.time AS TEXT)", "CAST(NEW.time AS TEXT)"),
+            Triple("book_groups", "CAST(OLD.groupId AS TEXT)", "CAST(NEW.groupId AS TEXT)"),
+            Triple(
+                "readRecord",
+                "(OLD.deviceId || '|' || OLD.bookName)",
+                "(NEW.deviceId || '|' || NEW.bookName)"
+            )
+        )
+        defs.forEach { (table, oldKeyExpr, newKeyExpr) ->
+            val triggerName = "trg_${table}_tombstone"
+            val tableName = "`$table`"
+            db.execSQL(
+                """
+                CREATE TRIGGER IF NOT EXISTS `$triggerName`
+                AFTER DELETE ON $tableName
+                BEGIN
+                    INSERT INTO sync_tombstones(tableName, recordKey, deletedAt)
+                    VALUES ('$table', $oldKeyExpr, $nowMs)
+                    ON CONFLICT(tableName, recordKey) DO UPDATE SET deletedAt = excluded.deletedAt;
+                END
+                """.trimIndent()
+            )
+            val insertTriggerName = "trg_${table}_tombstone_clean"
+            db.execSQL(
+                """
+                CREATE TRIGGER IF NOT EXISTS `$insertTriggerName`
+                AFTER INSERT ON $tableName
+                BEGIN
+                    DELETE FROM sync_tombstones WHERE tableName = '$table' AND recordKey = $newKeyExpr;
+                END
+                """.trimIndent()
+            )
+        }
     }
 
     private val migration_10_11 = object : Migration(10, 11) {

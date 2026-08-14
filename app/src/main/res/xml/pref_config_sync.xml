@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <io.legado.app.lib.prefs.PreferenceCategory
+        android:title="@string/sync_setting"
+        app:allowDividerAbove="false"
+        app:allowDividerBelow="false"
+        app:iconSpaceReserved="false"
+        app:layout="@layout/view_preference_category">
+
+        <io.legado.app.lib.prefs.SwitchPreference
+            android:defaultValue="false"
+            android:key="syncEnabled"
+            android:summary="@string/sync_enable_s"
+            android:title="@string/sync_enable"
+            app:allowDividerAbove="false"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.NameListPreference
+            android:defaultValue="15"
+            android:entries="@array/sync_interval"
+            android:entryValues="@array/sync_interval_values"
+            android:key="syncInterval"
+            android:summary="@string/sync_interval_s"
+            android:title="@string/sync_interval"
+            app:allowDividerAbove="false"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.MultiSelectPreference
+            android:entries="@array/sync_data_types"
+            android:entryValues="@array/sync_data_types_values"
+            android:key="syncDataTypes"
+            android:summary="@string/sync_data_types_s"
+            android:title="@string/sync_data_types"
+            app:allowDividerAbove="false"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.NameListPreference
+            android:defaultValue="manual"
+            android:entries="@array/sync_conflict_modes"
+            android:entryValues="@array/sync_conflict_modes_values"
+            android:key="syncConflictMode"
+            android:summary="@string/sync_conflict_mode_s"
+            android:title="@string/sync_conflict_mode"
+            app:allowDividerAbove="false"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+    </io.legado.app.lib.prefs.PreferenceCategory>
+
+    <io.legado.app.lib.prefs.PreferenceCategory
+        android:title="@string/sync_actions"
+        app:allowDividerAbove="false"
+        app:allowDividerBelow="false"
+        app:iconSpaceReserved="false"
+        app:layout="@layout/view_preference_category">
+
+        <io.legado.app.lib.prefs.Preference
+            android:key="sync_now"
+            android:summary="@string/sync_now_s"
+            android:title="@string/sync_now"
+            app:allowDividerAbove="false"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.Preference
+            android:key="sync_conflicts"
+            android:summary="@string/sync_conflicts_s"
+            android:title="@string/sync_conflicts"
+            app:allowDividerAbove="false"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.Preference
+            android:key="sync_last_status"
+            android:summary="@string/sync_last_status_s"
+            android:title="@string/sync_last_status"
+            app:allowDividerAbove="false"
+            app:allowDividerBelow="false"
+            app:iconSpaceReserved="false" />
+
+    </io.legado.app.lib.prefs.PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

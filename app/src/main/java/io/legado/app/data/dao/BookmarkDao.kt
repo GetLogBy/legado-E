@@ -48,6 +48,15 @@ interface BookmarkDao {
     )
     fun search(bookName: String, bookAuthor: String, key: String): List<Bookmark>
 
+    @Query("select * from bookmarks where time = :time")
+    fun getByTime(time: Long): Bookmark?
+
+    @get:Query("SELECT * FROM bookmarks where local_modified > cloud_modified")
+    val needPush: List<Bookmark>
+
+    @Query("update bookmarks set cloud_modified = :cloudModified, local_modified = :cloudModified where time = :time and local_modified <= :cloudModified")
+    fun markSynced(time: Long, cloudModified: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg bookmark: Bookmark)
 

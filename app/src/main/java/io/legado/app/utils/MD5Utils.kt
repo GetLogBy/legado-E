@@ -31,4 +31,13 @@ object MD5Utils {
         reStr = reStr.substring(8, 24)
         return reStr
     }
+
+    private val SHA1Digester
+        get() = threadLocal.getOrSet {
+            DigestUtil.digester("SHA-1")
+        }
+
+    fun sha1Encode(str: String?): String {
+        return SHA1Digester.digestHex(str)
+    }
 }

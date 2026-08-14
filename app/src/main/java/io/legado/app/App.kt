@@ -49,6 +49,9 @@ import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.rhino.NativeBaseSource
 import io.legado.app.help.source.SourceHelp
 import io.legado.app.help.storage.Backup
+import io.legado.app.help.sync.SyncManager
+import io.legado.app.help.sync.worker.SyncLifecycleObserver
+import io.legado.app.help.sync.worker.WorkManagerHelper
 import io.legado.app.model.BookCover
 import io.legado.app.utils.ChineseUtils
 import io.legado.app.utils.LogUtils
@@ -62,6 +65,7 @@ import splitties.systemservices.notificationManager
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
+import androidx.lifecycle.ProcessLifecycleOwner
 
 class App : Application() {
 
@@ -77,6 +81,9 @@ class App : Application() {
         applyDayNightInit(this)
         registerActivityLifecycleCallbacks(LifecycleHelp)
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(AppConfig)
+        //增量同步: 周期任务调度 + 进程退后台推送
+        WorkManagerHelper.schedule(this)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(SyncLifecycleObserver())
         Coroutine.async {
             LogUtils.init(this@App)
             LogUtils.d("App", "onCreate")
@@ -123,6 +130,8 @@ class App : Application() {
             if (AppConfig.syncBookProgress) {
                 AppWebDav.downloadAllBookProgress()
             }
+            //增量同步: 启动时拉取
+            SyncManager.syncOnStart()
         }
     }
 

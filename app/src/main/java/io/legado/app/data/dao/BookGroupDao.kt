@@ -70,6 +70,12 @@ interface BookGroupDao {
     @get:Query("SELECT * FROM book_groups ORDER BY `order`")
     val all: List<BookGroup>
 
+    @get:Query("SELECT * FROM book_groups where local_modified > cloud_modified")
+    val needPush: List<BookGroup>
+
+    @Query("update book_groups set cloud_modified = :cloudModified, local_modified = :cloudModified where groupId = :groupId and local_modified <= :cloudModified")
+    fun markSynced(groupId: Long, cloudModified: Long)
+
     @get:Query("select count(*) < 64 from book_groups where groupId >= 0 or groupId == ${Long.MIN_VALUE}")
     val canAddGroup: Boolean
 

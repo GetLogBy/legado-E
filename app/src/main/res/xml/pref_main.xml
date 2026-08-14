@@ -65,6 +65,13 @@
             app:iconSpaceReserved="false" />
 
         <io.legado.app.lib.prefs.Preference
+            android:icon="@drawable/ic_cfg_backup"
+            android:key="sync_setting"
+            android:summary="@string/sync_setting_s"
+            android:title="@string/sync_setting"
+            app:iconSpaceReserved="false" />
+
+        <io.legado.app.lib.prefs.Preference
             android:icon="@drawable/ic_cfg_theme"
             android:key="theme_setting"
             android:summary="@string/theme_setting_s"

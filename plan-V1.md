@@ -147,3 +147,45 @@ sync/tombstones/<table>_<key>.json         { deleted:true, deletedAt }
 - **大书架性能**：PROPFIND 每类型一次；优先文件级增量。书籍封面不入同步（仅元数据）。
 - **并发写冲突**：同一记录两端同时改 → 依赖冲突 UI；同一键递归冲突在 UI 端处理。
 - 需求文档 §8 的三问：不同步书籍文件本身；冲突窗口以 `lastPullAt` 为界；提供"覆盖云端/清空云端"入口放入 M4 或后续迭代。
+
+## 11.当前进度
+
+### 已完成
+M1 — 数据层改造（DB 89→90）
+- 实体加 local_modified/cloud_modified：Book、Bookmark、BookGroup、ReadRecord
+- 新增墓碑表 SyncTombstone + DAO、冲突表 SyncConflict + DAO
+- DatabaseMigrations.kt 新增 migration_89_90（加列、建表、DELETE→墓碑触发器、本地修改时间触发器）
+- 4 个 DAO 新增 needPush + markSynced，BookDao/BookmarkDao/ReadRecordDao 补 get-by-key
+- AppDatabase 升 v90、注册新 DAO，onOpen 也建触发器（全新安装可用）
+- 修复触发器 bug：up_modified 改为 NEW.cloud_modified = OLD.cloud_modified 条件，避免 markSynced 等值回写引发循环打点/重复推送
+M2 — 同步引擎核心
+- SyncTypes.kt：DataSyncType 枚举（books/bookmarks/bookGroups/readRecords/readConfigs）
+- SyncConfig.kt：读取开关/周期/类型/冲突策略
+- SyncLedger.kt：lastPullAt/lastPushTime/每类型游标（存 LocalConfig）
+- SyncClient.kt：按类型的 push/pull、墓碑 push/pull、readConfigs 整文件同步、冲突窗口判断
+- SyncManager.kt：Mutex 串行调度，syncNow/syncOnStart/syncOnStop，新增 suspend syncWorker 供 Worker 调用
+- ConflictResolver.kt：冲突入表、manual/keepLocal/keepCloud 策略、自动解决
+- 配置接入：PreferKey 新增 5 个 key，AppConfig 新增对应属性
+- MD5Utils.sha1Encode、AppWebDav.syncRootUrl
+M3 — 调度
+- WorkManager 依赖已加（gradle/libs.versions.toml work=2.10.0、app/build.gradle work-runtime-ktx + lifecycle-process）
+- SyncWorker.kt：CoroutineWorker，调 SyncManager.syncWorker()，失败返回 retry
+- WorkManagerHelper.kt：PeriodicWorkRequest，间隔>=15min，NetworkType.CONNECTED 约束，UPDATE 策略重排/取消
+- SyncLifecycleObserver.kt：ProcessLifecycleOwner ON_STOP → SyncManager.syncOnStop()
+- App.kt：onCreate 调度周期任务、注册生命周期观察者、启动后 syncOnStart()
+- AppConfig：syncEnabled/syncInterval 变更时重排周期任务
+- 注：本机无 Android SDK，未编译验证，需在本地跑 `./gradlew :app:compileAppDebugKotlin` 确认
+M4 — UI/设置
+- pref_config_sync.xml 设置页（总开关/同步间隔/数据类型多选/默认冲突策略/立即同步/上次同步状态/冲突列表入口）
+- MultiSelectPreference.kt：自定义多选偏好（右侧标签显示选中项），与 NameListPreference 同款外观
+- SyncConfigFragment.kt：首选写入默认数据类型、立即同步（WaitDialog + SyncManager.syncNow）、状态摘要刷新
+- AppConfig.syncDataTypes 改为 StringSet 存取（匹配 MultiSelectListPreference），syncInterval 改读 String（避免 ListPreference 存字符串被 getPrefInt 解析崩溃）
+- ConfigTag.SYNC_CONFIG + ConfigActivity 挂载 + pref_main.xml/MyFragment 增加"增量同步"入口
+- ConflictActivity + ConflictViewModel：冲突列表（类型/记录键 + 保留本地/保留云端/保留两者），已解决置灰，菜单支持"全部应用本地/云端"与"清除已解决"
+- ConflictResolver 新增 keepBoth()（两端各留一份、消除冲突）
+- SyncConflictDao 新增 observeAll()/pendingCount
+- 字符串/数组资源、AndroidManifest 注册 ConflictActivity
+
+### 未完成
+M5 — 测试
+- 冲突算法单测、迁移 androidTest、双模拟器同步演练未做

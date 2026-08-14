@@ -6,6 +6,7 @@ import io.legado.app.BuildConfig
 import io.legado.app.constant.AppConst
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
+import io.legado.app.help.sync.worker.WorkManagerHelper
 import io.legado.app.utils.GSON
 import io.legado.app.utils.canvasrecorder.CanvasRecorderFactory
 import io.legado.app.utils.fromJsonObject
@@ -13,6 +14,7 @@ import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.getPrefInt
 import io.legado.app.utils.getPrefLong
 import io.legado.app.utils.getPrefString
+import io.legado.app.utils.getPrefStringSet
 import io.legado.app.utils.isNightMode
 import io.legado.app.utils.parseIpsFromString
 import io.legado.app.utils.putPrefBoolean
@@ -126,6 +128,10 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
                     && appCtx.getPrefBoolean(PreferKey.optimizeRender, false)
 
             PreferKey.recordLog -> recordLog = appCtx.getPrefBoolean(PreferKey.recordLog)
+
+            //增量同步设置变更时重排周期任务
+            PreferKey.syncEnabled,
+            PreferKey.syncInterval -> WorkManagerHelper.schedule(appCtx)
 
         }
     }
@@ -822,5 +828,26 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         }
 
     val autoUpdateVariant get() = appCtx.getPrefBoolean("autoUpdateVariant", true)
+
+    //=== 增量同步配置 ===
+
+    val syncEnabled get() = appCtx.getPrefBoolean(PreferKey.syncEnabled, false)
+
+    val syncInterval: Int
+        get() = appCtx.getPrefString(PreferKey.syncInterval)?.toIntOrNull() ?: 15
+
+    /** 需要同步的数据类型 */
+    val syncDataTypes: Set<String>
+        get() = appCtx.getPrefStringSet(
+            PreferKey.syncDataTypes,
+            mutableSetOf("books", "bookmarks", "bookGroups", "readRecords")
+        ) ?: emptySet()
+
+    /** 默认冲突策略: local/cloud/manual */
+    val syncConflictMode get() = appCtx.getPrefString(PreferKey.syncConflictMode, "manual")
+
+    /** 墓碑保留天数 */
+    val syncTombstoneRetention get() = appCtx.getPrefInt(PreferKey.syncTombstoneRetention, 7)
 }
+
 
