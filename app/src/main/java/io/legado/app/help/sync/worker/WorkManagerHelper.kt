@@ -27,7 +27,7 @@ object WorkManagerHelper {
             cancel(context)
             return
         }
-        val interval = SyncConfig.intervalMinutes.coerceAtLeast(MIN_INTERVAL)
+        val interval = SyncConfig.intervalMinutes.toLong().coerceAtLeast(MIN_INTERVAL)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()

@@ -2,6 +2,8 @@ package io.legado.app.help.sync
 
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.utils.putLong
+import io.legado.app.utils.putString
+import io.legado.app.utils.remove
 
 /**
  * 同步状态记录, 持久化到 LocalConfig 共享参数

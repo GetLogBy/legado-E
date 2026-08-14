@@ -8,6 +8,7 @@ import io.legado.app.data.entities.ReadRecord
 import io.legado.app.data.entities.SyncConflict
 import io.legado.app.lib.webdav.WebDavFile
 import io.legado.app.utils.GSON
+import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.sha1Encode
 import java.io.File
 
