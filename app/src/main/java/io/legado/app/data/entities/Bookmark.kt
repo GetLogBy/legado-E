@@ -1,6 +1,7 @@
 package io.legado.app.data.entities
 
 import android.os.Parcelable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -20,5 +21,9 @@ data class Bookmark(
     var chapterPos: Int = 0,
     var chapterName: String = "",
     var bookText: String = "",
-    var content: String = ""
+    var content: String = "",
+    @ColumnInfo(name = "local_modified", defaultValue = "0")
+    var localModified: Long = 0,
+    @ColumnInfo(name = "cloud_modified", defaultValue = "0")
+    var cloudModified: Long = 0
 ) : Parcelable

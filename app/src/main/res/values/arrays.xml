@@ -208,4 +208,50 @@
 		<item>Customize</item>
 	</string-array>
 
+	<string-array name="sync_interval">
+		<item>15 minutes</item>
+		<item>30 minutes</item>
+		<item>1 hour</item>
+		<item>3 hours</item>
+		<item>6 hours</item>
+		<item>12 hours</item>
+	</string-array>
+
+	<string-array name="sync_interval_values">
+		<item>15</item>
+		<item>30</item>
+		<item>60</item>
+		<item>180</item>
+		<item>360</item>
+		<item>720</item>
+	</string-array>
+
+	<string-array name="sync_data_types">
+		<item>@string/sync_type_books</item>
+		<item>@string/sync_type_bookmarks</item>
+		<item>@string/sync_type_bookgroups</item>
+		<item>@string/sync_type_readrecords</item>
+		<item>@string/sync_type_readconfigs</item>
+	</string-array>
+
+	<string-array name="sync_data_types_values">
+		<item>books</item>
+		<item>bookmarks</item>
+		<item>bookGroups</item>
+		<item>readRecords</item>
+		<item>readConfigs</item>
+	</string-array>
+
+	<string-array name="sync_conflict_modes">
+		<item>@string/sync_conflict_manual</item>
+		<item>@string/sync_conflict_keep_local</item>
+		<item>@string/sync_conflict_keep_cloud</item>
+	</string-array>
+
+	<string-array name="sync_conflict_modes_values">
+		<item>manual</item>
+		<item>keepLocal</item>
+		<item>keepCloud</item>
+	</string-array>
+
 </resources>

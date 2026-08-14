@@ -10,6 +10,15 @@ interface ReadRecordDao {
     @get:Query("select * from readRecord")
     val all: List<ReadRecord>
 
+    @get:Query("select * from readRecord where local_modified > cloud_modified")
+    val needPush: List<ReadRecord>
+
+    @Query("select * from readRecord where deviceId = :deviceId and bookName = :bookName")
+    fun get(deviceId: String, bookName: String): ReadRecord?
+
+    @Query("update readRecord set cloud_modified = :cloudModified, local_modified = :cloudModified where deviceId = :deviceId and bookName = :bookName and local_modified <= :cloudModified")
+    fun markSynced(deviceId: String, bookName: String, cloudModified: Long)
+
     @get:Query(
         """
         select bookName, sum(readTime) as readTime, max(lastRead) as lastRead 

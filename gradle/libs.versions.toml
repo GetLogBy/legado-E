@@ -78,6 +78,8 @@ viewpager2 = "1.0.0"
 #noinspection GradleDependency
 firebaseBom = "33.2.0"
 
+work = "2.10.0"
+
 [libraries]
 
 activity-activity = { module = "androidx.activity:activity", version.ref = "activity" }
@@ -112,7 +114,10 @@ hutool-crypto = { module = "cn.hutool:hutool-crypto", version.ref = "hutool" }
 
 libarchive = { module = "me.zhanghai.android.libarchive:library", version.ref = "libarchive" }
 lifecycle-common-java8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "lifecycle" }
+lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
+
+work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 
 lyricViewx = { module = "com.github.Moriafly:LyricViewX", version.ref = "lyricViewx" }
 

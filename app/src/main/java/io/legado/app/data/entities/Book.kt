@@ -123,7 +123,13 @@ data class Book(
     var readConfig: ReadConfig? = null,
     //同步时间
     @ColumnInfo(defaultValue = "0")
-    var syncTime: Long = 0L
+    var syncTime: Long = 0L,
+    //本次本地修改时间(增量同步)
+    @ColumnInfo(name = "local_modified", defaultValue = "0")
+    var localModified: Long = 0,
+    //云端时间(增量同步)
+    @ColumnInfo(name = "cloud_modified", defaultValue = "0")
+    var cloudModified: Long = 0
 ) : Parcelable, BaseBook {
 
     override fun equals(other: Any?): Boolean {

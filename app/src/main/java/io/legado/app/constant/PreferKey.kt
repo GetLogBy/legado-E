@@ -182,6 +182,13 @@ object PreferKey {
     const val paddingDisplayCutouts = "paddingDisplayCutouts"
     const val autoCheckNewBackup = "autoCheckNewBackup"
 
+    //增量同步
+    const val syncEnabled = "syncEnabled"
+    const val syncInterval = "syncInterval"
+    const val syncDataTypes = "syncDataTypes"
+    const val syncConflictMode = "syncConflictMode"
+    const val syncTombstoneRetention = "syncTombstoneRetention"
+
     const val dThemeName = "durThemeName"
     const val dNThemeName = "durThemeNameNight"
 

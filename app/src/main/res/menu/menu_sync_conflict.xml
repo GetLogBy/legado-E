@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_apply_all_local"
+        android:title="@string/conflict_apply_all_local"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_apply_all_cloud"
+        android:title="@string/conflict_apply_all_cloud"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_clear_resolved"
+        android:title="@string/conflict_clear_resolved"
+        app:showAsAction="never" />
+
+</menu>

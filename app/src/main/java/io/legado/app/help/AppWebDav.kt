@@ -52,6 +52,13 @@ object AppWebDav {
 
     val isJianGuoYun get() = rootWebDavUrl.startsWith(defaultWebDavUrl, true)
 
+    /** 增量同步根目录 */
+    val syncRootUrl: String
+        get() {
+            val root = if (rootWebDavUrl.endsWith("/")) rootWebDavUrl else "$rootWebDavUrl/"
+            return "${root}legado/sync/"
+        }
+
     init {
         runBlocking {
             upConfig()
