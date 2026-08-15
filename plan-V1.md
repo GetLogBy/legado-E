@@ -185,7 +185,3 @@ M4 — UI/设置
 - ConflictResolver 新增 keepBoth()（两端各留一份、消除冲突）
 - SyncConflictDao 新增 observeAll()/pendingCount
 - 字符串/数组资源、AndroidManifest 注册 ConflictActivity
-
-### 未完成
-M5 — 测试
-- 冲突算法单测、迁移 androidTest、双模拟器同步演练未做
