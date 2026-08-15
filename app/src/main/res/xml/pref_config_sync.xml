@@ -19,7 +19,7 @@
             app:iconSpaceReserved="false" />
 
         <io.legado.app.lib.prefs.NameListPreference
-            android:defaultValue="15"
+            android:defaultValue="5"
             android:entries="@array/sync_interval"
             android:entryValues="@array/sync_interval_values"
             android:key="syncInterval"

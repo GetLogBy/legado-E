@@ -822,7 +822,11 @@
     <string name="sync_enable">開啟同步</string>
     <string name="sync_enable_s">定時以及應用程式啟動/退出時同步</string>
     <string name="sync_interval">同步間隔</string>
-    <string name="sync_interval_s">最小間隔為 15 分鐘</string>
+    <string name="sync_interval_s">最小間隔為即時（持續同步）</string>
+    <string name="sync_interval_immediate">即時</string>
+    <string name="sync_interval_5m">5分鐘</string>
+    <string name="sync_interval_10m">10分鐘</string>
+    <string name="sync_interval_30m">30分鐘</string>
     <string name="sync_data_types">同步資料類型</string>
     <string name="sync_data_types_s">選擇要同步的資料</string>
     <string name="sync_conflict_mode">預設衝突策略</string>

@@ -14,10 +14,11 @@ class SyncWorker(
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        return if (SyncManager.syncWorker()) {
-            Result.success()
-        } else {
-            Result.retry()
+        val ok = SyncManager.syncWorker()
+        if (ok) {
+            WorkManagerHelper.scheduleNext(applicationContext)
+            return Result.success()
         }
+        return Result.retry()
     }
 }

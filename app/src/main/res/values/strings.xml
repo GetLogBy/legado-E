@@ -837,7 +837,11 @@
     <string name="sync_enable">Enable sync</string>
     <string name="sync_enable_s">Synchronize periodically and on app start / exit</string>
     <string name="sync_interval">Sync interval</string>
-    <string name="sync_interval_s">Minimum interval is 15 minutes</string>
+    <string name="sync_interval_s">Minimum interval: immediately (syncs continuously)</string>
+    <string name="sync_interval_immediate">Immediately</string>
+    <string name="sync_interval_5m">5 minutes</string>
+    <string name="sync_interval_10m">10 minutes</string>
+    <string name="sync_interval_30m">30 minutes</string>
     <string name="sync_data_types">Sync data types</string>
     <string name="sync_data_types_s">Select which data to synchronize</string>
     <string name="sync_conflict_mode">Default conflict strategy</string>

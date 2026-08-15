@@ -835,7 +835,11 @@
     <string name="sync_enable">开启同步</string>
     <string name="sync_enable_s">定时以及应用启动/退出时同步</string>
     <string name="sync_interval">同步间隔</string>
-    <string name="sync_interval_s">最小间隔为 15 分钟</string>
+    <string name="sync_interval_s">最小间隔为即时（持续同步）</string>
+    <string name="sync_interval_immediate">即时</string>
+    <string name="sync_interval_5m">5分钟</string>
+    <string name="sync_interval_10m">10分钟</string>
+    <string name="sync_interval_30m">30分钟</string>
     <string name="sync_data_types">同步数据类型</string>
     <string name="sync_data_types_s">选择要同步的数据</string>
     <string name="sync_conflict_mode">默认冲突策略</string>
