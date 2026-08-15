@@ -834,7 +834,7 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
     val syncEnabled get() = appCtx.getPrefBoolean(PreferKey.syncEnabled, false)
 
     val syncInterval: Int
-        get() = appCtx.getPrefString(PreferKey.syncInterval)?.toIntOrNull() ?: 15
+        get() = appCtx.getPrefString(PreferKey.syncInterval)?.toIntOrNull() ?: 5
 
     /** 需要同步的数据类型 */
     val syncDataTypes: Set<String>

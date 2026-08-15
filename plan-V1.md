@@ -113,7 +113,7 @@ sync/tombstones/<table>_<key>.json         { deleted:true, deletedAt }
 ## 6. 调度与生命周期
 
 - 新增 `androidx.work:work-runtime-ktx` 到 `gradle/libs.versions.toml` 与 `app/build.gradle`。
-- `sync/worker/SyncWorker.kt`：`CoroutineWorker`，`PeriodicWorkRequest`（最短 15min，用户间隔取 >=15min 档位）+ `NetworkType.CONNECTED` 约束；设置变更时重排。
+- `sync/worker/SyncWorker.kt`：`CoroutineWorker`，间隔档位为 **即时/5分钟/10分钟/30分钟**；`>=15min` 用 `PeriodicWorkRequest`（WorkManager 周期任务下限）+ `NetworkType.CONNECTED` 约束，`<15min`（即时/5/10）用 `OneTimeWorkRequest` 自续期循环（Worker 同步成功后 `scheduleNext` 续排下一轮，即时=连续同步）；设置变更时重排。
 - `App.kt:123` 处同步逻辑改为 `SyncManager.pullOnly()`（替换/并列现有 `downloadAllBookProgress`）。
 - 进程退出推送：用 `ProcessLifecycleOwner` observer 或新建 `SyncLifecycleObserver` 在 `onStop` 触发 `pushOnly()`。
 - 手动同步按钮调用 `syncNow()`。
@@ -170,7 +170,8 @@ M2 — 同步引擎核心
 M3 — 调度
 - WorkManager 依赖已加（gradle/libs.versions.toml work=2.10.0、app/build.gradle work-runtime-ktx + lifecycle-process）
 - SyncWorker.kt：CoroutineWorker，调 SyncManager.syncWorker()，失败返回 retry
-- WorkManagerHelper.kt：PeriodicWorkRequest，间隔>=15min，NetworkType.CONNECTED 约束，UPDATE 策略重排/取消
+- WorkManagerHelper.kt：间隔>=15min 用 PeriodicWorkRequest，<15min（即时/5/10）用 OneTimeWorkRequest 自续期循环（scheduleNext），NetworkType.CONNECTED 约束，UPDATE 策略重排/取消
+- 同步间隔档位改为 即时(0)/5/10/30 分钟（values/arrays.xml + 四语言 strings），默认 5 分钟；WorkManagerHelper 双调度路径（periodic + loop）
 - SyncLifecycleObserver.kt：ProcessLifecycleOwner ON_STOP → SyncManager.syncOnStop()
 - App.kt：onCreate 调度周期任务、注册生命周期观察者、启动后 syncOnStart()
 - AppConfig：syncEnabled/syncInterval 变更时重排周期任务
@@ -185,7 +186,3 @@ M4 — UI/设置
 - ConflictResolver 新增 keepBoth()（两端各留一份、消除冲突）
 - SyncConflictDao 新增 observeAll()/pendingCount
 - 字符串/数组资源、AndroidManifest 注册 ConflictActivity
-
-### 未完成
-M5 — 测试
-- 冲突算法单测、迁移 androidTest、双模拟器同步演练未做
