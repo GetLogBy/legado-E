@@ -3,7 +3,7 @@ name: Build Web
 on:
   push:
     branches:
-      - main
+      - actions
     paths:
       - '**/modules/web/**'
   pull_request:

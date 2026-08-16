@@ -15,7 +15,7 @@ on:
       - '**/modules/web/**'
   workflow_run:
     workflows: [Build Web]
-    branches: [main]
+    branches: [actions]
     types:
       - completed
   workflow_dispatch:
@@ -47,7 +47,7 @@ jobs:
         env:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
-          git fetch --unshallow --depth=20 origin main 2>/dev/null || git fetch --depth=20 origin main 2>/dev/null || true
+          git fetch --unshallow --depth=20 origin actions 2>/dev/null || git fetch --depth=20 origin actions 2>/dev/null || true
           UPDATED_CONTENT=""
           IS_MERGE_PR=false
           if [[ -n "$COMMIT_MSG" ]]; then
