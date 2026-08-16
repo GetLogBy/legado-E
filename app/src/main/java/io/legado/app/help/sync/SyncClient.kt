@@ -45,6 +45,7 @@ object SyncClient {
 
     /** 确保所有云端目录存在 */
     suspend fun ensureDirs() {
+        ensureDir(baseUrl)
         DataSyncType.values().forEach { type ->
             kotlin.runCatching {
                 webDav(dirUrl(type)).makeAsDir()
@@ -53,6 +54,17 @@ object SyncClient {
         kotlin.runCatching {
             webDav(tombstonesUrl()).makeAsDir()
         }
+    }
+
+    /** 逐级创建目录, 兼容不支持自动创建父目录的服务器 */
+    private suspend fun ensureDir(url: String) {
+        val dav = webDav(url)
+        if (dav.exists()) return
+        val parent = url.trimEnd('/').substringBeforeLast('/', url) + "/"
+        if (parent != url && parent.contains("://")) {
+            ensureDir(parent)
+        }
+        dav.makeAsDir()
     }
 
     // ============================ push ============================
@@ -101,6 +113,7 @@ object SyncClient {
 
     /** 推送全部启用的类型 */
     suspend fun pushAll() {
+        ensureDirs()
         SyncConfig.dataTypes.forEach { type ->
             when (type) {
                 DataSyncType.BOOKS -> pushBooks()
