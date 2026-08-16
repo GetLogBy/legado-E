@@ -32,7 +32,6 @@ jobs:
     outputs:
       version: ${{ steps.set-ver.outputs.version }}
       versionL: ${{ steps.set-ver.outputs.versionL }}
-      lanzou: ${{ steps.check.outputs.lanzou }}
       updateLog_updated: ${{ steps.updateLog.outputs.updated }}
       updateLog_content: ${{ steps.updateLog.outputs.body }}
       build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
@@ -44,11 +43,6 @@ jobs:
         run: |
           echo "version=$(date -d "8 hour" -u +3.%y.%m%d%H)" >> $GITHUB_OUTPUT
           echo "versionL=$(date -d "8 hour" -u +3.%y.%m%d%H%M)" >> $GITHUB_OUTPUT
-      - id: check
-        run: |
-          if [ -n "${{ secrets.LANZOU_ID }}" ]; then
-            echo "lanzou=yes" >> $GITHUB_OUTPUT
-          fi
       - id: updateLog
         env:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
