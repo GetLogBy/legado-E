@@ -52,11 +52,11 @@ object AppWebDav {
 
     val isJianGuoYun get() = rootWebDavUrl.startsWith(defaultWebDavUrl, true)
 
-    /** 增量同步根目录 */
+    /** 增量同步根目录, 位于备份目录(rootWebDavUrl)下的 sync/ */
     val syncRootUrl: String
         get() {
             val root = if (rootWebDavUrl.endsWith("/")) rootWebDavUrl else "$rootWebDavUrl/"
-            return "${root}legado/sync/"
+            return "${root}sync/"
         }
 
     init {
